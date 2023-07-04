@@ -1,0 +1,23 @@
+{
+  "name": "chessviewer",
+  "version": "0.0.1",
+  "description": "Watch chess games notated in Portable Game Notation (PGN) from your terminal.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc --build --verbose",
+    "clean": "lerna run clean"
+  },
+  "author": "Daniel Walters",
+  "license": "ISC",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.61.0",
+    "@typescript-eslint/parser": "^5.61.0",
+    "eslint": "^8.44.0",
+    "lerna": "^7.1.1"
+  }
+}
