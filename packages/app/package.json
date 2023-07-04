@@ -16,6 +16,7 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "ink": "^4.2.0"
+    "ink": "^4.2.0",
+    "react": "^18.2.0"
   }
 }
