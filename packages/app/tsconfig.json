@@ -1,9 +1,10 @@
 {
-  "extends": "../../tsconfig.settings.json",
-  "compilerOptions": {
-    "composite": true,
-    "outDir": "dist",
-    "rootDir": "src"
-  },
-  "include": ["src"]
+	"extends": "../../tsconfig.settings.json",
+	"compilerOptions": {
+		"composite": true,
+		"jsx": "react",
+		"outDir": "dist",
+		"rootDir": "src"
+	},
+	"include": ["src"]
 }
