@@ -9,7 +9,9 @@
 	},
 	"scripts": {
 		"build": "tsc && chmod +x dist/cli.js",
+		"build-watch": "tsc --watch",
 		"start": "npm run build && dist/cli.js",
+		"dev": "nodemon --exitcrash -e ts,tsx,js,jsx --exec 'yarn build && node dist/cli.js || exit 1'",
 		"pretest": "npm run build",
 		"clean": "rm -rf *.tsbuildinfo dist",
 		"test": "xo && ava"
@@ -49,6 +51,7 @@
 		"eslint-plugin-react": "^7.32.2",
 		"eslint-plugin-react-hooks": "^4.6.0",
 		"ink-testing-library": "^3.0.0",
+		"nodemon": "^2.0.22",
 		"typescript": "^5.1.6",
 		"xo": "^0.39.1"
 	},

@@ -1,11 +1,6 @@
 {
+  "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
-    "module": "Node16",
-    "target": "es2022",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node16",
     "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
