@@ -1,0 +1,47 @@
+.chess-board {
+  margin: auto;
+  margin-top: 100px;
+  width: 500px;
+  height: 500px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+
+
+    &--square {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      $reverse: false;
+      @for $i from 0 through 63 {
+        &:nth-child(#{$i + 1}) {
+          @if $i % 8 == 0 and $i != 0 {
+            $reverse: not $reverse;
+          }         
+
+          @if $reverse {
+            @if $i % 2 == 0 {
+              background-color: #f0dab5;
+            } @else {
+              background-color: #b58962;
+            }
+          } @else {
+            @if $i % 2 == 0 {
+              background-color: #b58962;
+            } @else {
+              background-color: #f0dab5;
+            }
+          }
+        }
+      }
+
+      img {
+        height: 85%;
+        width: 85%;
+      }
+    }
+
+}
