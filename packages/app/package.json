@@ -1,59 +1,22 @@
 {
-	"name": "@chessviewer/app",
-	"version": "0.0.1",
-	"author": "Daniel Walters",
-	"license": "MIT",
-	"bin": "dist/cli.js",
-	"engines": {
-		"node": ">=16"
-	},
-	"scripts": {
-		"build": "tsc && chmod +x dist/cli.js",
-		"build-watch": "tsc --watch",
-		"start": "npm run build && dist/cli.js",
-		"dev": "nodemon --exitcrash -e ts,tsx,js,jsx --exec 'yarn build && node dist/cli.js || exit 1'",
-		"pretest": "npm run build",
-		"clean": "rm -rf *.tsbuildinfo dist",
-		"test": "xo && ava"
-	},
-	"files": [
-		"dist/cli.js"
-	],
-	"dependencies": {
-		"ink": "^3.2.0",
-		"meow": "^9.0.0",
-		"react": "^17.0.2",
-		"undefined": "^0.1.0"
-	},
-	"ava": {
-		"typescript": {
-			"extensions": [
-				"tsx"
-			],
-			"rewritePaths": {
-				"source/": "dist/"
-			}
-		}
-	},
-	"xo": {
-		"extends": "xo-react",
-		"rules": {
-			"react/prop-types": "off"
-		}
-	},
-	"devDependencies": {
-		"@ava/typescript": "^4.1.0",
-		"@sindresorhus/tsconfig": "^3.0.1",
-		"@types/react": "^18.2.14",
-		"ava": "^5.3.1",
-		"chalk": "^4.1.2",
-		"eslint-config-xo-react": "^0.27.0",
-		"eslint-plugin-react": "^7.32.2",
-		"eslint-plugin-react-hooks": "^4.6.0",
-		"ink-testing-library": "^3.0.0",
-		"nodemon": "^2.0.22",
-		"typescript": "^5.1.6",
-		"xo": "^0.39.1"
-	},
-	"type": "module"
+  "name": "app",
+  "author": "Daniel Walters",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "clean": "rm -rf *.tsbuildinfo dist"
+  },
+  "dependencies": {
+    "@types/node": "20.3.3",
+    "@types/react": "18.2.14",
+    "@types/react-dom": "18.2.6",
+    "eslint-config-next": "13.4.8",
+    "next": "13.4.8",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "typescript": "5.1.6"
+  }
 }

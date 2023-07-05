@@ -6,7 +6,6 @@
     "noImplicitThis": true,
     "noUncheckedIndexedAccess": true,
     "strict": true,
-    "outDir": "dist",
-    "rootDir": "src"
+    "outDir": "dist"
   }
 }
