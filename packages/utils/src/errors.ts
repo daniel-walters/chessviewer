@@ -1,4 +1,10 @@
-import { Square, SquareErrors } from "@chessviewer/types";
+import { Square } from "@chessviewer/types";
+
+export enum SquareErrors {
+  "LENGTH",
+  "RANK",
+  "FILE",
+}
 
 export class NotASquareError extends Error {
   constructor(kind: SquareErrors, data: any) {

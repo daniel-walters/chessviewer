@@ -2,8 +2,8 @@
 import { useState } from "react";
 import Image from "next/image";
 
-import { Piece, PieceColour } from "@chessviewer/types";
-import { Move, PGNParser } from "@chessviewer/parser";
+import { Move, Piece, PieceColour } from "@chessviewer/types";
+import { PGNParser } from "@chessviewer/parser";
 import { Chess } from "@chessviewer/chess";
 
 import pgn from "../test";
@@ -74,7 +74,6 @@ const getPlayer = (move: number): PieceColour => {
 export default function Home() {
   const parser = new PGNParser(pgn);
   const moves = parser.moves;
-  console.log(moves);
 
   const [chess] = useState(new Chess());
   const [board, setBoard] = useState(chess.board);
@@ -85,7 +84,7 @@ export default function Home() {
     const turnToShow = moves[turn];
     const player: PieceColour = getPlayer(move);
     const moveToShow = turnToShow?.[player === "White" ? 0 : 1];
-    console.log(moveToShow);
+
     if (moveToShow) {
       switch (moveToShow.type) {
         case Move.MOVE: {
