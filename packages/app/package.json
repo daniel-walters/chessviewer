@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "@chessviewer/ui",
   "author": "Daniel Walters",
   "version": "0.0.1",
   "scripts": {
@@ -10,14 +10,20 @@
     "clean": "rm -rf *.tsbuildinfo dist"
   },
   "dependencies": {
+    "next": "13.4.8",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "@chessviewer/utils": "0.0.1",
+    "@chessviewer/chess": "0.0.1",
+    "@chessviewer/parser": "0.0.1"
+  },
+  "devDependencies": {
+    "sass": "^1.63.6",
+    "typescript": "5.1.6",
     "@types/node": "20.3.3",
     "@types/react": "18.2.14",
     "@types/react-dom": "18.2.6",
     "eslint-config-next": "13.4.8",
-    "next": "13.4.8",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "sass": "^1.63.6",
-    "typescript": "5.1.6"
+    "@chessviewer/types": "0.0.1"
   }
 }
