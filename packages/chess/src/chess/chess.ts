@@ -21,9 +21,9 @@ export default class Chess {
     colour: PieceColour,
     destination: Square,
     startingFile?: File
-  ): ChessPiece | null {
+  ): (ChessPiece | null)[] {
     return (
-      this.board.find((square) => {
+      this.board.filter((square) => {
         return (
           square &&
           (startingFile

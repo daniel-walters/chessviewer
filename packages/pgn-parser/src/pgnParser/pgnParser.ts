@@ -8,7 +8,7 @@ import {
   isDefined,
   splitSquare,
 } from "@chessviewer/utils";
-import { PGNMovesByTurn } from "./utils";
+import { PGNMovesByTurn, filterTakenSquares } from "./utils";
 import {
   PGNPieceName,
   PieceColour,
@@ -51,6 +51,7 @@ export default class PGNParser {
   readonly meta;
   readonly moves;
   readonly chess;
+  tempCounter = 0;
 
   constructor(pgn: string) {
     this.chess = new Chess();
@@ -87,6 +88,7 @@ export default class PGNParser {
       turnInfo.push(this.#parseMove(black, "Black"));
     }
 
+    this.tempCounter++;
     return turnInfo;
   }
 
@@ -155,11 +157,15 @@ export default class PGNParser {
         const square = move.substring(0, 2);
         assertIsSquare(square);
 
+        const originFile = square.charAt(0);
+        assertIsFile(originFile);
+
         const originSquare = this.chess.findPiece(
           "Pawn",
           player,
-          square
-        )?.currentSquare;
+          square,
+          originFile
+        )[0]?.currentSquare;
 
         assertIsDefined(originSquare);
 
@@ -189,12 +195,24 @@ export default class PGNParser {
           assertIsFile(originFile);
           assertIsSquare(targetSquare);
 
-          const originSquare = this.chess.findPiece(
+          let originSquare: Square = undefined as any;
+          const possibleSquares = this.chess.findPiece(
             piece,
             player,
             targetSquare,
             originFile
-          )?.currentSquare;
+          );
+
+          if (possibleSquares.length === 1) {
+            originSquare = possibleSquares[0]!.currentSquare;
+          } else {
+            originSquare = filterTakenSquares(
+              piece,
+              possibleSquares,
+              targetSquare,
+              this.chess
+            ).currentSquare;
+          }
 
           assertIsDefined(originSquare);
 
@@ -207,11 +225,23 @@ export default class PGNParser {
 
           assertIsSquare(targetSquare);
 
-          const originSquare = this.chess.findPiece(
+          let originSquare: Square = undefined as any;
+          const possibleSquares = this.chess.findPiece(
             piece,
             player,
             targetSquare
-          )?.currentSquare;
+          );
+
+          if (possibleSquares.length === 1) {
+            originSquare = possibleSquares[0]!.currentSquare;
+          } else {
+            originSquare = filterTakenSquares(
+              piece,
+              possibleSquares,
+              targetSquare,
+              this.chess
+            ).currentSquare;
+          }
 
           assertIsDefined(originSquare);
 
@@ -268,7 +298,7 @@ export default class PGNParser {
           player,
           captureSquare,
           pawnFile
-        )?.currentSquare;
+        )[0]?.currentSquare;
 
         assertIsDefined(originSquare);
 
@@ -280,7 +310,6 @@ export default class PGNParser {
           const direction = player === "White" ? -1 : +1;
 
           const enPassantSquare = `${epFile}${Number(epRank) + direction}`;
-          console.log(enPassantSquare);
           assertIsSquare(enPassantSquare);
 
           this.chess.deletePiece(enPassantSquare);
@@ -308,11 +337,23 @@ export default class PGNParser {
 
           assertIsSquare(targetSquare);
 
-          const originSquare = this.chess.findPiece(
+          let originSquare: Square = undefined as any;
+          const possibleSquares = this.chess.findPiece(
             piece,
             player,
             targetSquare
-          )?.currentSquare;
+          );
+
+          if (possibleSquares.length === 1) {
+            originSquare = possibleSquares[0]!.currentSquare;
+          } else {
+            originSquare = filterTakenSquares(
+              piece,
+              possibleSquares,
+              targetSquare,
+              this.chess
+            ).currentSquare;
+          }
 
           assertIsDefined(originSquare);
 
@@ -324,14 +365,27 @@ export default class PGNParser {
           const targetSquare = data.substring(2);
 
           assertIsFile(originFile);
+          assertIsFile(originFile);
           assertIsSquare(targetSquare);
 
-          const originSquare = this.chess.findPiece(
+          let originSquare: Square = undefined as any;
+          const possibleSquares = this.chess.findPiece(
             piece,
             player,
             targetSquare,
             originFile
-          )?.currentSquare;
+          );
+
+          if (possibleSquares.length === 1) {
+            originSquare = possibleSquares[0]!.currentSquare;
+          } else {
+            originSquare = filterTakenSquares(
+              piece,
+              possibleSquares,
+              targetSquare,
+              this.chess
+            ).currentSquare;
+          }
 
           assertIsDefined(originSquare);
 

@@ -2,7 +2,7 @@ import { getCharFile, isSquare } from "@chessviewer/utils";
 
 import ChessPiece from "../chessPiece/chessPiece";
 
-type Chessboard = (ChessPiece | null)[];
+export type Chessboard = (ChessPiece | null)[];
 
 export function getInitialBoard(): Chessboard {
   const chessboard: Chessboard = [];
