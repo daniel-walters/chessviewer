@@ -47,6 +47,10 @@ export default class Chess {
     piece.promoteTo(promoteTo);
   }
 
+  deletePiece(square: Square): void {
+    this.board[squareToIdx(square)] = null;
+  }
+
   movePiece(from: Square, to: Square): void {
     const piece = this.getPieceAt(from);
 

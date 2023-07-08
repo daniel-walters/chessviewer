@@ -84,4 +84,30 @@ describe("PGNParser", () => {
       expect(board.getPieceAt("f8")?.colour).toBe("White");
     });
   });
+
+  describe("En Passant", () => {
+    describe("should correctly handle en passant", () => {
+      it("for white", async () => {
+        const pgn = await readTestFile("testFiles/enpassantWhite.pgn");
+        const parser = new PGNParser(pgn);
+        const board = parser.chess;
+
+        expect(board.getPieceAt("d6")?.type).toBe("Pawn");
+        expect(board.getPieceAt("d6")?.colour).toBe("White");
+
+        expect(board.getPieceAt("d5")).toBeNull();
+      });
+
+      it("for black", async () => {
+        const pgn = await readTestFile("testFiles/enpassantBlack.pgn");
+        const parser = new PGNParser(pgn);
+        const board = parser.chess;
+
+        expect(board.getPieceAt("c3")?.type).toBe("Pawn");
+        expect(board.getPieceAt("c3")?.colour).toBe("Black");
+
+        expect(board.getPieceAt("c4")).toBeNull();
+      });
+    });
+  });
 });

@@ -6,6 +6,7 @@ import {
   assertIsFile,
   assertIsSquare,
   isDefined,
+  splitSquare,
 } from "@chessviewer/utils";
 import { PGNMovesByTurn } from "./utils";
 import {
@@ -273,6 +274,18 @@ export default class PGNParser {
 
         info.from = originSquare;
         info.to = captureSquare;
+
+        if (!this.chess.getPieceAt(captureSquare)) {
+          const [epFile, epRank] = splitSquare(captureSquare);
+          const direction = player === "White" ? -1 : +1;
+
+          const enPassantSquare = `${epFile}${Number(epRank) + direction}`;
+          console.log(enPassantSquare);
+          assertIsSquare(enPassantSquare);
+
+          this.chess.deletePiece(enPassantSquare);
+        }
+
         this.chess.movePiece(originSquare, captureSquare);
 
         if (move.includes("=")) {
