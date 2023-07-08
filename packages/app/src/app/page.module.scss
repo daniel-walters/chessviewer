@@ -3,10 +3,10 @@ $squareTwo: #b58962;
 $highlight: #dbc348;
 
 .chess-board {
-  margin: auto;
+  margin-left: 10vw; 
   margin-top: 100px;
-  width: 500px;
-  height: 500px;
+  width: 80vh;
+  height: 80vh;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
   grid-template-rows: repeat(8, 1fr);
@@ -20,6 +20,7 @@ $highlight: #dbc348;
       align-items: center;
 
       $reverse: false;
+
       @for $i from 0 through 63 {
         &:nth-child(#{$i + 1}) {
           @if $i % 8 == 0 and $i != 0 {
@@ -45,6 +46,10 @@ $highlight: #dbc348;
       img {
         height: 85%;
         width: 85%;
+      }
+
+      &__highlight {
+        background-color: $highlight !important;
       }
     }
 

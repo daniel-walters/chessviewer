@@ -1,9 +1,10 @@
 "use client";
+import classNames from "classnames";
 import { useState } from "react";
 import Image from "next/image";
 
-import { Move, Piece, PieceColour } from "@chessviewer/types";
-import { PGNParser } from "@chessviewer/parser";
+import { Piece, PieceColour, Square } from "@chessviewer/types";
+import { PGNParser, Move } from "@chessviewer/parser";
 import { Chess } from "@chessviewer/chess";
 
 import pgn from "../test";
@@ -21,6 +22,7 @@ import wKSVG from "../../public/wK.svg";
 import wQSVG from "../../public/wQ.svg";
 
 import styles from "./page.module.scss";
+import { squareToIdx } from "@chessviewer/utils";
 
 console.log(pgn);
 
@@ -44,6 +46,12 @@ const formatBoard = (board: Chess["board"]): Chess["board"] => {
     ...seven.reverse(),
     ...eight.reverse(),
   ];
+};
+
+const adjustIndexForView = (idx: number): number => {
+  const startOfRow = Math.floor(idx / 8) * 8;
+
+  return startOfRow + 7 - (idx - startOfRow);
 };
 
 const PieceMap: Record<Piece, string> = {
@@ -79,6 +87,7 @@ export default function Home() {
   const [board, setBoard] = useState(chess.board);
   const [turn, setTurn] = useState(0);
   const [move, setMove] = useState(0);
+  const [highlightSquares, setHighlightSquares] = useState<number[]>([]);
 
   const handleMove = () => {
     const turnToShow = moves[turn];
@@ -91,12 +100,28 @@ export default function Home() {
           if (moveToShow.from && moveToShow.to) {
             chess.movePiece(moveToShow.from, moveToShow.to);
           }
+          const toHighlight = [
+            adjustIndexForView(Number(squareToIdx(moveToShow.to as Square))) ??
+              -1,
+            adjustIndexForView(
+              Number(squareToIdx(moveToShow.from as Square))
+            ) ?? -1,
+          ];
+          setHighlightSquares(toHighlight);
           break;
         }
         case Move.CAPTURE: {
           if (moveToShow.from && moveToShow.to) {
             chess.movePiece(moveToShow.from, moveToShow.to);
           }
+          const toHighlight = [
+            adjustIndexForView(Number(squareToIdx(moveToShow.to as Square))) ??
+              -1,
+            adjustIndexForView(
+              Number(squareToIdx(moveToShow.from as Square))
+            ) ?? -1,
+          ];
+          setHighlightSquares(toHighlight);
           break;
         }
         case Move.RESULT: {
@@ -107,9 +132,17 @@ export default function Home() {
           if (player === "White") {
             chess.movePiece("e1", "c1");
             chess.movePiece("a1", "d1");
+            setHighlightSquares([
+              adjustIndexForView(squareToIdx("e1")),
+              adjustIndexForView(squareToIdx("c1")),
+            ]);
           } else if (player === "Black") {
             chess.movePiece("e8", "c8");
             chess.movePiece("a8", "d8");
+            setHighlightSquares([
+              adjustIndexForView(squareToIdx("e8")),
+              adjustIndexForView(squareToIdx("c8")),
+            ]);
           }
           break;
         }
@@ -117,9 +150,17 @@ export default function Home() {
           if (player === "White") {
             chess.movePiece("e1", "g1");
             chess.movePiece("h1", "f1");
+            setHighlightSquares([
+              adjustIndexForView(squareToIdx("e1")),
+              adjustIndexForView(squareToIdx("g1")),
+            ]);
           } else if (player === "Black") {
             chess.movePiece("e8", "g8");
             chess.movePiece("h8", "f8");
+            setHighlightSquares([
+              adjustIndexForView(squareToIdx("e8")),
+              adjustIndexForView(squareToIdx("g8")),
+            ]);
           }
           break;
         }
@@ -132,23 +173,26 @@ export default function Home() {
     }
   };
 
-  const handleClick = () => {
-    handleMove();
-  };
-
   return (
     <main>
       <div className={styles["chess-board"]}>
         {formatBoard(board).map((piece, i) => {
           return (
-            <div key={`${i}`} className={styles["chess-board--square"]}>
+            <div
+              key={`${i}`}
+              className={classNames(
+                styles["chess-board--square"],
+                highlightSquares.includes(i) &&
+                  styles["chess-board--square__highlight"]
+              )}
+            >
               {piece && (
                 <Image alt="" src={PieceMap[`${piece.colour}${piece.type}`]} />
               )}
             </div>
           );
         })}
-        <button onClick={handleClick}>Next Move</button>
+        <button onClick={handleMove}>Next Move</button>
       </div>
     </main>
   );
