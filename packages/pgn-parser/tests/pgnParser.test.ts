@@ -64,4 +64,24 @@ describe("PGNParser", () => {
       expect(board.getPieceAt("g7")).toBeNull();
     });
   });
+
+  describe("Promotions", () => {
+    it("should correctly handle promotions from moves", async () => {
+      const pgn = await readTestFile("testFiles/promote.pgn");
+      const parser = new PGNParser(pgn);
+      const board = parser.chess;
+
+      expect(board.getPieceAt("g4")?.type).toBe("Queen");
+      expect(board.getPieceAt("g4")?.colour).toBe("White");
+    });
+
+    it("should correctly handle promotions from captures", async () => {
+      const pgn = await readTestFile("testFiles/promoteCapture.pgn");
+      const parser = new PGNParser(pgn);
+      const board = parser.chess;
+
+      expect(board.getPieceAt("f8")?.type).toBe("Queen");
+      expect(board.getPieceAt("f8")?.colour).toBe("White");
+    });
+  });
 });

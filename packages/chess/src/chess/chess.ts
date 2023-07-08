@@ -37,6 +37,16 @@ export default class Chess {
     );
   }
 
+  promotePiece(square: Square, promoteTo: PieceName): void {
+    const piece = this.getPieceAt(square);
+
+    if (!isDefined(piece)) {
+      throw new PieceNotFoundError(square);
+    }
+
+    piece.promoteTo(promoteTo);
+  }
+
   movePiece(from: Square, to: Square): void {
     const piece = this.getPieceAt(from);
 

@@ -105,7 +105,7 @@ export default class PGNParser {
   #parseMovement(move: string, player: PieceColour): MoveInformation {
     let moveType: MoveType;
 
-    if (move.match(/^[a-h][1-8]$/)) {
+    if (move.match(/^[a-h][1-8]/)) {
       moveType = MoveType.PAWN;
     } else if (move.match(/^[KQBRN][a-g]/)) {
       moveType = MoveType.PIECE;
@@ -151,19 +151,28 @@ export default class PGNParser {
 
     switch (type) {
       case MoveType.PAWN: {
-        assertIsSquare(move);
+        const square = move.substring(0, 2);
+        assertIsSquare(square);
 
         const originSquare = this.chess.findPiece(
           "Pawn",
           player,
-          move
+          square
         )?.currentSquare;
 
         assertIsDefined(originSquare);
 
         info.from = originSquare;
-        info.to = move;
-        this.chess.movePiece(originSquare, move);
+        info.to = square;
+        this.chess.movePiece(originSquare, square);
+
+        if (move.includes("=")) {
+          const promoteTo = move.match(/[QNRB]/)?.[0];
+          assertIsDefined(promoteTo);
+          info.type = Move.PROMOTE;
+          info.promoteTo = PGNPieceMap[promoteTo as PGNPieceName];
+          this.chess.promotePiece(square, info.promoteTo);
+        }
 
         break;
       }
@@ -246,7 +255,7 @@ export default class PGNParser {
       case CaptureType.PAWN: {
         const data = move.split("x");
         const pawnFile = data[0];
-        const captureSquare = data[1];
+        const captureSquare = data[1]?.substring(0, 2);
 
         assertIsDefined(pawnFile);
         assertIsDefined(captureSquare);
@@ -265,6 +274,14 @@ export default class PGNParser {
         info.from = originSquare;
         info.to = captureSquare;
         this.chess.movePiece(originSquare, captureSquare);
+
+        if (move.includes("=")) {
+          const promoteTo = move.match(/[QNRB]/)?.[0];
+          assertIsDefined(promoteTo);
+          info.type = Move.PROMOTE;
+          info.promoteTo = PGNPieceMap[promoteTo as PGNPieceName];
+          this.chess.promotePiece(captureSquare, info.promoteTo);
+        }
 
         break;
       }

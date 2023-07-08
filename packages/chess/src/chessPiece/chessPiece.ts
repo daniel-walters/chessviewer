@@ -4,7 +4,7 @@ import getPossibleMoves from "./getPossibleMoves";
 
 export default class ChessPiece {
   #currentSquare;
-  readonly type;
+  type;
   readonly colour;
   #possibleMoves;
   constructor(colour: PieceColour, type: PieceName, startingSquare: Square) {
@@ -23,6 +23,11 @@ export default class ChessPiece {
 
   movePiece(square: Square): void {
     this.#currentSquare = square;
+    this.#updatePossibleMoves();
+  }
+
+  promoteTo(piece: PieceName): void {
+    this.type = piece;
     this.#updatePossibleMoves();
   }
 
