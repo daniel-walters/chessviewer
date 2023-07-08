@@ -15,9 +15,6 @@ $highlight: #dbc348;
     &--square {
       height: 100%;
       width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
 
       $reverse: false;
 
@@ -43,14 +40,25 @@ $highlight: #dbc348;
         }
       }
 
-      img {
-        height: 85%;
-        width: 85%;
-      }
 
       &__highlight {
         background-color: $highlight !important;
       }
     }
 
+    &.inner-pieces {
+      position: absolute;
+      top: 0;
+
+      .chess-board--square__inner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        img {
+          height: 85%;
+          width: 85%;
+        }
+      }
+    }
 }

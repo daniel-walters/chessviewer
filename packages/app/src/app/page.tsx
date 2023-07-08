@@ -1,11 +1,8 @@
 "use client";
-import classNames from "classnames";
-import { useState } from "react";
-import Image from "next/image";
 
+import { motion } from "framer-motion";
 import { Piece, PieceColour, Square } from "@chessviewer/types";
-import { PGNParser, Move } from "@chessviewer/parser";
-import { Chess } from "@chessviewer/chess";
+import { Move, PGNParser } from "@chessviewer/parser";
 
 import pgn from "../test";
 import bPSVG from "../../public/bP.svg";
@@ -22,37 +19,10 @@ import wKSVG from "../../public/wK.svg";
 import wQSVG from "../../public/wQ.svg";
 
 import styles from "./page.module.scss";
-import { squareToIdx } from "@chessviewer/utils";
-
-console.log(pgn);
-
-const formatBoard = (board: Chess["board"]): Chess["board"] => {
-  const one = board.slice(0, 8);
-  const two = board.slice(8, 16);
-  const three = board.slice(16, 24);
-  const four = board.slice(24, 32);
-  const five = board.slice(32, 40);
-  const six = board.slice(40, 48);
-  const seven = board.slice(48, 56);
-  const eight = board.slice(56, 64);
-
-  return [
-    ...one.reverse(),
-    ...two.reverse(),
-    ...three.reverse(),
-    ...four.reverse(),
-    ...five.reverse(),
-    ...six.reverse(),
-    ...seven.reverse(),
-    ...eight.reverse(),
-  ];
-};
-
-const adjustIndexForView = (idx: number): number => {
-  const startOfRow = Math.floor(idx / 8) * 8;
-
-  return startOfRow + 7 - (idx - startOfRow);
-};
+import { useState } from "react";
+import Image from "next/image";
+import { getNumericFile, isDefined, splitSquare } from "@chessviewer/utils";
+import classNames from "classnames";
 
 const PieceMap: Record<Piece, string> = {
   BlackPawn: bPSVG,
@@ -69,131 +39,259 @@ const PieceMap: Record<Piece, string> = {
   WhiteQueen: wQSVG,
 };
 
-const getPlayer = (move: number): PieceColour => {
-  if (move === 0) {
-    return "White";
-  } else if (move === 1) {
-    return "Black";
-  } else {
-    return move % 2 ? "White" : "Black";
+type IDPiece = {
+  piece: Piece | null;
+  id: string;
+};
+
+type Chessboard = IDPiece[];
+
+const getInitPieces = (colour: PieceColour): Chessboard => {
+  const row: Chessboard = [];
+  const isBlack = colour === "Black";
+
+  row.push({ piece: `${colour}Rook`, id: isBlack ? "0" : "56" });
+  row.push({ piece: `${colour}Knight`, id: isBlack ? "1" : "57" });
+  row.push({ piece: `${colour}Bishop`, id: isBlack ? "2" : "58" });
+  row.push({ piece: `${colour}Queen`, id: isBlack ? "3" : "59" });
+  row.push({ piece: `${colour}King`, id: isBlack ? "4" : "60" });
+  row.push({ piece: `${colour}Bishop`, id: isBlack ? "5" : "61" });
+  row.push({ piece: `${colour}Knight`, id: isBlack ? "6" : "62" });
+  row.push({ piece: `${colour}Rook`, id: isBlack ? "7" : "63" });
+
+  return row;
+};
+
+const getInitPawns = (colour: PieceColour): Chessboard => {
+  const row: Chessboard = [];
+  const offset = colour === "Black" ? 8 : 48;
+
+  for (let i = 0; i < 8; i++) {
+    row.push({ piece: `${colour}Pawn`, id: String(i + offset) });
   }
+
+  return row;
+};
+
+const setupBoard = (): Chessboard => {
+  const chessboard: Chessboard = [];
+
+  chessboard.push(...getInitPieces("Black"));
+  chessboard.push(...getInitPawns("Black"));
+
+  for (let i = 0; i < 32; i++) {
+    chessboard.push({ piece: null, id: String(i + 16) });
+  }
+
+  chessboard.push(...getInitPawns("White"));
+  chessboard.push(...getInitPieces("White"));
+
+  return chessboard;
+};
+
+const squareToIdx = (square: Square, orientation: PieceColour): number => {
+  const [file, rank] = splitSquare(square);
+
+  const rankNum = Math.abs(8 - Number(rank));
+  const fileNum = getNumericFile(file) - 1;
+
+  if (orientation === "White") {
+    return 8 * rankNum + fileNum;
+  }
+
+  return 0;
+};
+
+const movePiece = (
+  from: Square,
+  to: Square,
+  chessboard: Chessboard,
+  type: Move
+): Chessboard => {
+  const fromIdx = squareToIdx(from, "White");
+  const toIdx = squareToIdx(to, "White");
+
+  const clonedBoard = [...chessboard];
+
+  const fromSquare = clonedBoard[fromIdx];
+  const toSquare = clonedBoard[toIdx];
+
+  if (isDefined(fromSquare) && isDefined(toSquare)) {
+    switch (type) {
+      case Move.MOVE:
+      case Move.CASTLE_LONG:
+      case Move.CASTLE_SHORT: {
+        clonedBoard[fromIdx] = toSquare;
+        clonedBoard[toIdx] = fromSquare;
+        break;
+      }
+      case Move.CAPTURE: {
+        toSquare.piece = null;
+        clonedBoard[fromIdx] = toSquare;
+        clonedBoard[toIdx] = fromSquare;
+        break;
+      }
+    }
+  } else {
+    throw new Error("Cant move");
+  }
+
+  return clonedBoard;
 };
 
 export default function Home() {
   const parser = new PGNParser(pgn);
-  const moves = parser.moves;
 
-  const [chess] = useState(new Chess());
-  const [board, setBoard] = useState(chess.board);
-  const [turn, setTurn] = useState(0);
-  const [move, setMove] = useState(0);
-  const [highlightSquares, setHighlightSquares] = useState<number[]>([]);
+  const [curMove, setCurMove] = useState(-1);
+  const [chessboard, setChessboard] = useState(setupBoard());
+  const [curPgn, setCurPgn] = useState<string>(pgn);
+  const [moves, setMoves] = useState(parser.moves.flat());
 
-  const handleMove = () => {
-    const turnToShow = moves[turn];
-    const player: PieceColour = getPlayer(move);
-    const moveToShow = turnToShow?.[player === "White" ? 0 : 1];
+  const handleMove = (direction: "NEXT" | "PREV") => {
+    const dirConst = direction === "NEXT" ? 1 : -1;
 
-    if (moveToShow) {
-      switch (moveToShow.type) {
-        case Move.MOVE: {
-          if (moveToShow.from && moveToShow.to) {
-            chess.movePiece(moveToShow.from, moveToShow.to);
-          }
-          const toHighlight = [
-            adjustIndexForView(Number(squareToIdx(moveToShow.to as Square))) ??
-              -1,
-            adjustIndexForView(
-              Number(squareToIdx(moveToShow.from as Square))
-            ) ?? -1,
-          ];
-          setHighlightSquares(toHighlight);
-          break;
+    const displayMove = moves[curMove + dirConst];
+
+    switch (displayMove?.type) {
+      case Move.MOVE:
+      case Move.CAPTURE: {
+        const { from, to } = displayMove;
+
+        if (isDefined(from) && isDefined(to)) {
+          const updatedBoard = movePiece(
+            from,
+            to,
+            chessboard,
+            displayMove.type
+          );
+          setChessboard(updatedBoard);
         }
-        case Move.CAPTURE: {
-          if (moveToShow.from && moveToShow.to) {
-            chess.movePiece(moveToShow.from, moveToShow.to);
-          }
-          const toHighlight = [
-            adjustIndexForView(Number(squareToIdx(moveToShow.to as Square))) ??
-              -1,
-            adjustIndexForView(
-              Number(squareToIdx(moveToShow.from as Square))
-            ) ?? -1,
-          ];
-          setHighlightSquares(toHighlight);
-          break;
-        }
-        case Move.RESULT: {
-          alert("GAME FINISHED");
-          break;
-        }
-        case Move.CASTLE_LONG: {
-          if (player === "White") {
-            chess.movePiece("e1", "c1");
-            chess.movePiece("a1", "d1");
-            setHighlightSquares([
-              adjustIndexForView(squareToIdx("e1")),
-              adjustIndexForView(squareToIdx("c1")),
-            ]);
-          } else if (player === "Black") {
-            chess.movePiece("e8", "c8");
-            chess.movePiece("a8", "d8");
-            setHighlightSquares([
-              adjustIndexForView(squareToIdx("e8")),
-              adjustIndexForView(squareToIdx("c8")),
-            ]);
-          }
-          break;
-        }
-        case Move.CASTLE_SHORT: {
-          if (player === "White") {
-            chess.movePiece("e1", "g1");
-            chess.movePiece("h1", "f1");
-            setHighlightSquares([
-              adjustIndexForView(squareToIdx("e1")),
-              adjustIndexForView(squareToIdx("g1")),
-            ]);
-          } else if (player === "Black") {
-            chess.movePiece("e8", "g8");
-            chess.movePiece("h8", "f8");
-            setHighlightSquares([
-              adjustIndexForView(squareToIdx("e8")),
-              adjustIndexForView(squareToIdx("g8")),
-            ]);
-          }
-          break;
-        }
+
+        break;
       }
-      setBoard([...chess.board]);
-      setMove(move + 1);
-      if (player === "Black") {
-        setTurn(turn + 1);
+      case Move.RESULT: {
+        alert("GAME OVER");
+        break;
+      }
+      case Move.CASTLE_LONG: {
+        if (displayMove.player === "White") {
+          const boardChangeOne = movePiece(
+            "e1",
+            "c1",
+            chessboard,
+            displayMove.type
+          );
+          const updatedBoard = movePiece(
+            "a1",
+            "d1",
+            boardChangeOne,
+            displayMove.type
+          );
+
+          setChessboard(updatedBoard);
+        } else {
+          const boardChangeOne = movePiece(
+            "e8",
+            "c8",
+            chessboard,
+            displayMove.type
+          );
+          const updatedBoard = movePiece(
+            "a8",
+            "d8",
+            boardChangeOne,
+            displayMove.type
+          );
+
+          setChessboard(updatedBoard);
+        }
+        break;
+      }
+      case Move.CASTLE_SHORT: {
+        if (displayMove.player === "White") {
+          const boardChangeOne = movePiece(
+            "e1",
+            "g1",
+            chessboard,
+            displayMove.type
+          );
+          const updatedBoard = movePiece(
+            "h1",
+            "f1",
+            boardChangeOne,
+            displayMove.type
+          );
+
+          setChessboard(updatedBoard);
+        } else {
+          const boardChangeOne = movePiece(
+            "e8",
+            "g8",
+            chessboard,
+            displayMove.type
+          );
+          const updatedBoard = movePiece(
+            "h8",
+            "f8",
+            boardChangeOne,
+            displayMove.type
+          );
+
+          setChessboard(updatedBoard);
+        }
+        break;
       }
     }
+
+    setCurMove(curMove + dirConst);
   };
 
   return (
     <main>
       <div className={styles["chess-board"]}>
-        {formatBoard(board).map((piece, i) => {
+        {chessboard.map((_, i) => {
+          return <div key={i} className={styles["chess-board--square"]} />;
+        })}
+      </div>
+      <div
+        className={classNames(styles["chess-board"], styles["inner-pieces"])}
+      >
+        {chessboard.map((piece) => {
           return (
-            <div
-              key={`${i}`}
-              className={classNames(
-                styles["chess-board--square"],
-                highlightSquares.includes(i) &&
-                  styles["chess-board--square__highlight"]
-              )}
+            <motion.div
+              key={piece.id}
+              className={styles["chess-board--square__inner"]}
+              transition={{
+                layout: { duration: 0.3, ease: "linear" },
+              }}
+              layout
             >
-              {piece && (
-                <Image alt="" src={PieceMap[`${piece.colour}${piece.type}`]} />
-              )}
-            </div>
+              {piece.piece && <Image src={PieceMap[piece.piece]} alt="" />}
+            </motion.div>
           );
         })}
-        <button onClick={handleMove}>Next Move</button>
       </div>
+      <button disabled={curMove <= 0} onClick={() => handleMove("PREV")}>
+        Prev move
+      </button>
+      <button
+        disabled={curMove === moves.length - 1}
+        onClick={() => handleMove("NEXT")}
+      >
+        Next move
+      </button>
+      <textarea value={curPgn} onChange={(e) => setCurPgn(e.target.value)} />
+      <button
+        onClick={() => {
+          setCurMove(-1);
+          setChessboard(setupBoard());
+          const pgnParser = new PGNParser(curPgn);
+          setMoves(pgnParser.moves.flat());
+          console.log(curPgn);
+        }}
+      >
+        Load game
+      </button>
     </main>
   );
 }
