@@ -8,40 +8,18 @@ import {
   isDefined,
 } from "@chessviewer/utils";
 import { PGNMovesByTurn } from "./utils";
-import { PGNPieceName, PieceColour, Square } from "@chessviewer/types";
-
-export enum Move {
-  "MOVE",
-  "CAPTURE",
-  "RESULT",
-  "CASTLE_LONG",
-  "CASTLE_SHORT",
-}
-
-enum CaptureType {
-  "PAWN",
-  "PIECE",
-}
-enum MoveType {
-  "PAWN",
-  "PIECE",
-}
-enum CastleType {
-  "SHORT",
-  "LONG",
-}
-
-type MoveInformation = {
-  from: Square | null;
-  to: Square | null;
-  type: Move;
-  player: PieceColour;
-};
-
-type TurnInformation = [MoveInformation, MoveInformation]; // [white, black]
-
-type ParsedMoves = TurnInformation[];
-type ParsedMeta = string;
+import {
+  PGNPieceName,
+  PieceColour,
+  Move,
+  ParsedMeta,
+  TurnInformation,
+  ParsedMoves,
+  MoveInformation,
+  CastleType,
+  MoveType,
+  CaptureType,
+} from "@chessviewer/types";
 
 export default class PGNParser {
   readonly meta;
