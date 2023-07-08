@@ -2,9 +2,10 @@ import { Chess } from "@chessviewer/chess";
 import {
   PGNPieceMap,
   Results,
+  assertIsDefined,
+  assertIsFile,
+  assertIsSquare,
   isDefined,
-  isFile,
-  isSquare,
 } from "@chessviewer/utils";
 import { PGNMovesByTurn } from "./utils";
 import { PGNPieceName, PieceColour, Square } from "@chessviewer/types";
@@ -143,13 +144,11 @@ export default class PGNParser {
     player: PieceColour,
     type: MoveType
   ): MoveInformation {
-    const info: MoveInformation = { type: Move.MOVE , player} as any;
+    const info: MoveInformation = { type: Move.MOVE, player } as any;
 
     switch (type) {
       case MoveType.PAWN: {
-        if (!isSquare(move)) {
-          throw new Error("Cant move pawn to an invalid square");
-        }
+        assertIsSquare(move);
 
         const originSquare = this.chess.findPiece(
           "Pawn",
@@ -157,9 +156,7 @@ export default class PGNParser {
           move
         )?.currentSquare;
 
-        if (!isDefined(originSquare)) {
-          throw new Error("No piece could be found");
-        }
+        assertIsDefined(originSquare);
 
         info.from = originSquare;
         info.to = move;
@@ -176,9 +173,8 @@ export default class PGNParser {
           const originFile = data.charAt(0);
           const targetSquare = data.substring(1);
 
-          if (!isFile(originFile) || !isSquare(targetSquare)) {
-            throw new Error("Invalid square in piece movement");
-          }
+          assertIsFile(originFile);
+          assertIsSquare(targetSquare);
 
           const originSquare = this.chess.findPiece(
             piece,
@@ -187,9 +183,7 @@ export default class PGNParser {
             originFile
           )?.currentSquare;
 
-          if (!isDefined(originSquare)) {
-            throw new Error("bad square");
-          }
+          assertIsDefined(originSquare);
 
           info.from = originSquare;
           info.to = targetSquare;
@@ -198,9 +192,7 @@ export default class PGNParser {
         } else if (data.match(/[a-g][1-8]/)) {
           const targetSquare = data.substring(0, 2);
 
-          if (!isSquare(targetSquare)) {
-            throw new Error("Invalid square in piece movement");
-          }
+          assertIsSquare(targetSquare);
 
           const originSquare = this.chess.findPiece(
             piece,
@@ -208,9 +200,7 @@ export default class PGNParser {
             targetSquare
           )?.currentSquare;
 
-          if (!isDefined(originSquare)) {
-            throw new Error("Piece cannot be found");
-          }
+          assertIsDefined(originSquare);
 
           info.from = originSquare;
           info.to = targetSquare;
@@ -255,17 +245,10 @@ export default class PGNParser {
         const pawnFile = data[0];
         const captureSquare = data[1];
 
-        if (!isDefined(pawnFile) || !isDefined(captureSquare)) {
-          throw new Error("Pawn capture could not be destructured");
-        }
-
-        if (!isSquare(captureSquare)) {
-          throw new Error("captureSquare is not a valid square");
-        }
-
-        if (!isFile(pawnFile)) {
-          throw new Error("Invalid starting file");
-        }
+        assertIsDefined(pawnFile);
+        assertIsDefined(captureSquare);
+        assertIsSquare(captureSquare);
+        assertIsFile(pawnFile);
 
         const originSquare = this.chess.findPiece(
           "Pawn",
@@ -274,9 +257,8 @@ export default class PGNParser {
           pawnFile
         )?.currentSquare;
 
-        if (!isDefined(originSquare)) {
-          throw new Error("No piece could be found");
-        }
+        assertIsDefined(originSquare);
+
         info.from = originSquare;
         info.to = captureSquare;
         this.chess.movePiece(originSquare, captureSquare);
@@ -291,9 +273,7 @@ export default class PGNParser {
         if (data.match(/^x/)) {
           const targetSquare = data.substring(1, 3);
 
-          if (!isSquare(targetSquare)) {
-            throw new Error("Invalid square in piece capture");
-          }
+          assertIsSquare(targetSquare);
 
           const originSquare = this.chess.findPiece(
             piece,
@@ -301,9 +281,7 @@ export default class PGNParser {
             targetSquare
           )?.currentSquare;
 
-          if (!isDefined(originSquare)) {
-            throw new Error("Piece cannot be found");
-          }
+          assertIsDefined(originSquare);
 
           info.from = originSquare;
           info.to = targetSquare;
@@ -312,9 +290,8 @@ export default class PGNParser {
           const originFile = data.charAt(0);
           const targetSquare = data.substring(2);
 
-          if (!isFile(originFile) || !isSquare(targetSquare)) {
-            throw new Error("Invalid square in piece movement");
-          }
+          assertIsFile(originFile);
+          assertIsSquare(targetSquare);
 
           const originSquare = this.chess.findPiece(
             piece,
@@ -323,9 +300,8 @@ export default class PGNParser {
             originFile
           )?.currentSquare;
 
-          if (!isDefined(originSquare)) {
-            throw new Error("bad square");
-          }
+          assertIsDefined(originSquare);
+
           info.from = originSquare;
           info.to = targetSquare;
 

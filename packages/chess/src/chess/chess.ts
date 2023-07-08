@@ -1,5 +1,5 @@
 import { File, PieceColour, PieceName, Square } from "@chessviewer/types";
-import { isDefined, squareToIdx } from "@chessviewer/utils";
+import { PieceNotFoundError, isDefined, squareToIdx } from "@chessviewer/utils";
 
 import ChessPiece from "../chessPiece/chessPiece";
 import { getInitialBoard } from "./createChessBoard";
@@ -41,7 +41,7 @@ export default class Chess {
     const piece = this.getPieceAt(from);
 
     if (!isDefined(piece)) {
-      throw new Error("Piece doesn't exist to move");
+      throw new PieceNotFoundError(from);
     }
 
     piece.movePiece(to);

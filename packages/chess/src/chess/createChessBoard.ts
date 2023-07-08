@@ -1,4 +1,4 @@
-import { isSquare } from "@chessviewer/utils";
+import { getCharFile, isSquare } from "@chessviewer/utils";
 
 import ChessPiece from "../chessPiece/chessPiece";
 
@@ -17,7 +17,7 @@ export function getInitialBoard(): Chessboard {
   chessboard.push(new ChessPiece("White", "Rook", "h1"));
 
   for (let i = 1; i <= 8; i++) {
-    const square = `${String.fromCharCode(96 + i)}2`;
+    const square = `${getCharFile(i)}2`;
 
     if (isSquare(square)) {
       chessboard.push(new ChessPiece("White", "Pawn", square));
@@ -29,7 +29,7 @@ export function getInitialBoard(): Chessboard {
   }
 
   for (let i = 1; i <= 8; i++) {
-    const square = `${String.fromCharCode(96 + i)}7`;
+    const square = `${getCharFile(i)}7`;
 
     if (isSquare(square)) {
       chessboard.push(new ChessPiece("Black", "Pawn", square));
