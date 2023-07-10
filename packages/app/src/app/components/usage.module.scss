@@ -26,8 +26,9 @@
   }
 
   @media screen and (max-width: 1080px) {
+    height: auto;
     width: 80vw;
-    left: 10vw;
+    left: calc(10vw - $md);
     h1 {
       font-size: $fontLg;
     }
