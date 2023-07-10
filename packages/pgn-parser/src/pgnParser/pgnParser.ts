@@ -42,10 +42,18 @@ export type MoveInformation = {
   type: Move;
   player: PieceColour;
   promoteTo?: PieceName;
+  capturedPiece?: PieceName;
+  rawPGN: string;
+  enpassant?: boolean;
+  capturedSquare?: Square
 };
 export type TurnInformation = [MoveInformation, MoveInformation]; // [white, black]
 export type ParsedMoves = TurnInformation[];
-export type ParsedMeta = string;
+export type ParsedMeta = {
+  white?: string;
+  black?: string;
+  result?: string;
+};
 
 export default class PGNParser {
   readonly meta;
@@ -64,17 +72,43 @@ export default class PGNParser {
 
   #parse(pgn: string): [ParsedMeta, ParsedMoves] {
     const split = pgn.split("\n\n");
-    const meta = split[0] || "";
+    const rawMeta = split[0] || "";
     const rawMoves = split[1] || "";
     const turns: TurnInformation[] = [];
 
-    const PGNTurns = this.#PGNMovesByTurn(rawMoves);
+    const PGNTurns = this.#PGNMovesByTurn(
+      split.length === 1 ? rawMeta : rawMoves
+    );
 
     PGNTurns.forEach((turn) => {
       turns.push(this.#parseTurn(turn));
     });
 
+    const meta = this.#parseMeta(rawMeta);
+
     return [meta, turns];
+  }
+
+  #parseMeta(rawMeta: string): ParsedMeta {
+    const lines = rawMeta.split("\n");
+    const meta: ParsedMeta = {} as any;
+
+    lines.forEach((line) => {
+      if (line.toLowerCase().includes("white ")) {
+        const data = line.match(/(".*?")/)?.[0].replaceAll('"', "");
+        meta.white = data;
+      }
+      if (line.toLowerCase().includes("black ")) {
+        const data = line.match(/(".*?")/)?.[0].replaceAll('"', "");
+        meta.black = data;
+      }
+      if (line.toLowerCase().includes("result ")) {
+        const data = line.match(/(".*?")/)?.[0].replaceAll('"', "");
+        meta.result = data;
+      }
+    });
+
+    return meta;
   }
 
   #parseTurn(turn: string): TurnInformation {
@@ -97,9 +131,9 @@ export default class PGNParser {
       return this.#parseCapture(move, player);
     } else if (move === "O-O-O" || move === "O-O") {
       const type = move === "O-O" ? CastleType.SHORT : CastleType.LONG;
-      return this.#handleCastle(player, type);
+      return this.#handleCastle(player, type, move);
     } else if (Results.includes(move as any)) {
-      return { type: Move.RESULT, from: null, to: null, player };
+      return { type: Move.RESULT, from: null, to: null, player, rawPGN: move };
     } else {
       return this.#parseMovement(move, player);
     }
@@ -119,8 +153,17 @@ export default class PGNParser {
     return this.#handleMove(move, player, moveType);
   }
 
-  #handleCastle(player: PieceColour, type: CastleType): MoveInformation {
-    const info: MoveInformation = { to: null, from: null, player } as any;
+  #handleCastle(
+    player: PieceColour,
+    type: CastleType,
+    move: string
+  ): MoveInformation {
+    const info: MoveInformation = {
+      to: null,
+      from: null,
+      player,
+      rawPGN: move,
+    } as any;
 
     if (type === CastleType.SHORT) {
       info.type = Move.CASTLE_SHORT;
@@ -150,7 +193,11 @@ export default class PGNParser {
     player: PieceColour,
     type: MoveType
   ): MoveInformation {
-    const info: MoveInformation = { type: Move.MOVE, player } as any;
+    const info: MoveInformation = {
+      type: Move.MOVE,
+      player,
+      rawPGN: move,
+    } as any;
 
     switch (type) {
       case MoveType.PAWN: {
@@ -160,12 +207,19 @@ export default class PGNParser {
         const originFile = square.charAt(0);
         assertIsFile(originFile);
 
-        const originSquare = this.chess.findPiece(
+        let originSquare: Square = undefined as any;
+        const possibleSquares = this.chess.findPiece(
           "Pawn",
           player,
           square,
           originFile
-        )[0]?.currentSquare;
+        );
+
+        if (possibleSquares.length === 1) {
+          originSquare = possibleSquares[0]!.currentSquare;
+        } else {
+          originSquare = filterTakenSquares("Pawn", possibleSquares, square, this.chess).currentSquare;
+        }
 
         assertIsDefined(originSquare);
 
@@ -280,7 +334,11 @@ export default class PGNParser {
     player: PieceColour,
     type: CaptureType
   ): MoveInformation {
-    const info: MoveInformation = { type: Move.CAPTURE, player } as any;
+    const info: MoveInformation = {
+      type: Move.CAPTURE,
+      player,
+      rawPGN: move,
+    } as any;
 
     switch (type) {
       case CaptureType.PAWN: {
@@ -305,6 +363,8 @@ export default class PGNParser {
         info.from = originSquare;
         info.to = captureSquare;
 
+        info.capturedPiece = this.chess.getPieceAt(captureSquare)?.type;
+
         if (!this.chess.getPieceAt(captureSquare)) {
           const [epFile, epRank] = splitSquare(captureSquare);
           const direction = player === "White" ? -1 : +1;
@@ -313,6 +373,9 @@ export default class PGNParser {
           assertIsSquare(enPassantSquare);
 
           this.chess.deletePiece(enPassantSquare);
+          info.capturedPiece = "Pawn";
+          info.enpassant = true;
+          info.capturedSquare = enPassantSquare;
         }
 
         this.chess.movePiece(originSquare, captureSquare);
@@ -359,6 +422,7 @@ export default class PGNParser {
 
           info.from = originSquare;
           info.to = targetSquare;
+          info.capturedPiece = this.chess.getPieceAt(targetSquare)?.type;
           this.chess.movePiece(originSquare, targetSquare);
         } else if (data.match(/^[a-h]x/)) {
           const originFile = data.charAt(0);
@@ -392,6 +456,7 @@ export default class PGNParser {
           info.from = originSquare;
           info.to = targetSquare;
 
+          info.capturedPiece = this.chess.getPieceAt(targetSquare)?.type;
           this.chess.movePiece(originSquare, targetSquare);
         } else {
           throw new Error("Error capturing piece");

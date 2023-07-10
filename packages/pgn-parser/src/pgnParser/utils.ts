@@ -30,6 +30,23 @@ export function filterTakenSquares(
       const [pFile, pRank] = splitSquare(square.currentSquare);
 
       switch (pieceKind) {
+        case "Pawn": {
+          if (Math.abs(Number(tRank) - Number(pRank)) === 2) {
+            let testSquare;
+
+            if (square.colour === "White") {
+              testSquare = `${pFile}${Number(tRank) - 1}`;
+            } else {
+              testSquare = `${pFile}${Number(tRank) + 1}`;
+            }
+
+            assertIsSquare(testSquare);
+            if (board.getPieceAt(testSquare)) {
+              return false;
+            }
+          }
+          return true;
+        }
         case "Rook": {
           const squaresInBetween: Square[] = [];
 

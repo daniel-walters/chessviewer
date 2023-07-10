@@ -30,4 +30,4 @@ export const PGNPieceMap: PieceMap = {
   R: "Rook",
 };
 
-export const Results = ["1-0", "0-1", "1/2-1/2"] as const;
+export const Results = ["1-0", "0-1", "1/2-1/2", "*"] as const;
