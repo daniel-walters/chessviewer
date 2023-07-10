@@ -1,64 +1,60 @@
-$squareOne: #f0dab5;
-$squareTwo: #b58962;
-$highlight: #dbc348;
+@import "src/app/variables";
 
-.chess-board {
-  margin-left: 10vw; 
-  margin-top: 100px;
-  width: 80vh;
-  height: 80vh;
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  grid-template-rows: repeat(8, 1fr);
+.main-layout {
+  height: 100vh;
+  display: flex;
+  justify-content: space-between;
 
+  &.dim {
+    filter: brightness(0.5);
+  }
 
-    &--square {
-      height: 100%;
-      width: 100%;
+  @media screen and (max-width: 1080px) {
+    flex-direction: column;
+    align-items: center;
+  }
+}
 
-      $reverse: false;
+.usage-button {
+  width: auto;
+  margin-top: $xl;
+  margin-bottom: $lg;
 
-      @for $i from 0 through 63 {
-        &:nth-child(#{$i + 1}) {
-          @if $i % 8 == 0 and $i != 0 {
-            $reverse: not $reverse;
-          }         
+  button {
+    margin-left: auto;
+    margin-right: $xxl;
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: $fontLg;
+    display: flex;
+    align-items: center;
+    gap: $xs;
 
-          @if $reverse {
-            @if $i % 2 == 0 {
-              background-color: $squareOne 
-            } @else {
-              background-color: $squareTwo
-            }
-          } @else {
-            @if $i % 2 == 0 {
-              background-color: $squareTwo
-            } @else {
-              background-color: $squareOne 
-            }
-          }
-        }
-      }
+    &:hover {
+      cursor: pointer;
+    }
+  }
 
+  svg {
+    height: $xl;
+    width: $xl;
+    fill: white;
+  }
 
-      &__highlight {
-        background-color: $highlight !important;
-      }
+  @media screen and (max-width: 1080px) {
+    margin-top: $md;
+    margin-bottom: $md;
+    align-items: center;
+
+    button {
+      margin: auto;
+      font-size: $fontMd;
     }
 
-    &.inner-pieces {
-      position: absolute;
-      top: 0;
-
-      .chess-board--square__inner {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-
-        img {
-          height: 85%;
-          width: 85%;
-        }
-      }
+    svg {
+      width: $md;
+      height: $md;
     }
+  }
 }

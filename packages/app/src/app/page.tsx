@@ -1,50 +1,20 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Piece, PieceColour, Square } from "@chessviewer/types";
-import { Move, PGNParser } from "@chessviewer/parser";
-
-import pgn from "../test";
-import bPSVG from "../../public/bP.svg";
-import bRSVG from "../../public/bR.svg";
-import bNSVG from "../../public/bN.svg";
-import bBSVG from "../../public/bB.svg";
-import bKSVG from "../../public/bK.svg";
-import bQSVG from "../../public/bQ.svg";
-import wPSVG from "../../public/wP.svg";
-import wRSVG from "../../public/wR.svg";
-import wNSVG from "../../public/wN.svg";
-import wBSVG from "../../public/wB.svg";
-import wKSVG from "../../public/wK.svg";
-import wQSVG from "../../public/wQ.svg";
-
-import styles from "./page.module.scss";
-import { useState } from "react";
-import Image from "next/image";
-import { getNumericFile, isDefined, splitSquare } from "@chessviewer/utils";
+import { useEffect, useRef, useState } from "react";
 import classNames from "classnames";
 
-const PieceMap: Record<Piece, string> = {
-  BlackPawn: bPSVG,
-  BlackRook: bRSVG,
-  BlackKnight: bNSVG,
-  BlackBishop: bBSVG,
-  BlackKing: bKSVG,
-  BlackQueen: bQSVG,
-  WhitePawn: wPSVG,
-  WhiteRook: wRSVG,
-  WhiteKnight: wNSVG,
-  WhiteBishop: wBSVG,
-  WhiteKing: wKSVG,
-  WhiteQueen: wQSVG,
-};
+import { Move, PGNParser } from "@chessviewer/parser";
+import { Piece, PieceColour, PieceName, Square } from "@chessviewer/types";
+import { getNumericFile, isDefined, splitSquare } from "@chessviewer/utils";
 
-type IDPiece = {
-  piece: Piece | null;
-  id: string;
-};
+import UsageModal from "./components/Usage";
+import Chessboard from "./components/Chessboard";
 
-type Chessboard = IDPiece[];
+import QuestionMark from "../../public/question-mark.svg?svgr";
+
+import styles from "./page.module.scss";
+import pgn from "../test";
+import MoveInfo from "./components/MoveInfo";
 
 const getInitPieces = (colour: PieceColour): Chessboard => {
   const row: Chessboard = [];
@@ -106,7 +76,13 @@ const movePiece = (
   from: Square,
   to: Square,
   chessboard: Chessboard,
-  type: Move
+  type: Move,
+  direction: "NEXT" | "PREV",
+  capturedPiece?: PieceName,
+  colour?: PieceColour,
+  promoteTo?: PieceName,
+  enpassant?: boolean,
+  capturedSquare?: Square
 ): Chessboard => {
   const fromIdx = squareToIdx(from, "White");
   const toIdx = squareToIdx(to, "White");
@@ -120,15 +96,61 @@ const movePiece = (
     switch (type) {
       case Move.MOVE:
       case Move.CASTLE_LONG:
-      case Move.CASTLE_SHORT: {
+      case Move.CASTLE_SHORT:
+      case Move.PROMOTE: {
         clonedBoard[fromIdx] = toSquare;
         clonedBoard[toIdx] = fromSquare;
+        if (promoteTo && colour) {
+          if (direction === "NEXT") {
+            clonedBoard[toIdx]!.piece = `${colour}${promoteTo}`;
+            if (capturedPiece) {
+              clonedBoard[fromIdx]!.piece = null;
+            }
+          } else {
+            clonedBoard[fromIdx]!.piece = `${colour}Pawn`;
+            if (capturedPiece) {
+              clonedBoard[toIdx] = {
+                piece: `${
+                  colour === "White" ? "Black" : "White"
+                }${capturedPiece}` as Piece,
+                id: String(Math.random()),
+              };
+            }
+          }
+        }
         break;
       }
       case Move.CAPTURE: {
-        toSquare.piece = null;
-        clonedBoard[fromIdx] = toSquare;
-        clonedBoard[toIdx] = fromSquare;
+        if (direction === "NEXT") {
+          toSquare.piece = null;
+          clonedBoard[fromIdx] = toSquare;
+          clonedBoard[toIdx] = fromSquare;
+          if (enpassant) {
+            const deleteAt = squareToIdx(capturedSquare!, "White");
+            clonedBoard[deleteAt]!.piece = null;
+          }
+        } else {
+          if (enpassant) {
+            const temp = clonedBoard[fromIdx];
+            clonedBoard[fromIdx] = toSquare;
+            clonedBoard[toIdx] = temp!;
+            const addTo = squareToIdx(capturedSquare!, "White");
+            clonedBoard[addTo] = {
+              piece: `${colour === "White" ? "Black" : "White"}Pawn` as Piece,
+              id: String(Math.random() + "asd"),
+            };
+            clonedBoard[toIdx]!.piece = null;
+          } else {
+            clonedBoard[fromIdx] = toSquare;
+            clonedBoard[toIdx] = {
+              piece: `${
+                colour === "White" ? "Black" : "White"
+              }${capturedPiece}` as Piece,
+              id: String(Math.random()),
+            };
+          }
+        }
+
         break;
       }
     }
@@ -143,18 +165,29 @@ export default function Home() {
   const parser = new PGNParser(pgn);
 
   const [curMove, setCurMove] = useState(-1);
+  const [showModal, setShowModal] = useState(false);
   const [chessboard, setChessboard] = useState(setupBoard());
-  const [curPgn, setCurPgn] = useState<string>(pgn);
   const [moves, setMoves] = useState(parser.moves.flat());
+  const [meta, setMeta] = useState(parser.meta);
+  const [highlightMoves, setHighlightMoves] = useState<number[]>([]);
+
+  const handleReset = (pgn: string) => {
+    const pgnParser = new PGNParser(pgn);
+    setMoves(pgnParser.moves.flat());
+    setMeta(pgnParser.meta);
+    setCurMove(-1);
+    setHighlightMoves([]);
+    setChessboard(setupBoard());
+  };
 
   const handleMove = (direction: "NEXT" | "PREV") => {
     const dirConst = direction === "NEXT" ? 1 : -1;
-
-    const displayMove = moves[curMove + dirConst];
+    const displayMove = moves[curMove + (direction === "NEXT" ? 1 : 0)];
 
     switch (displayMove?.type) {
       case Move.MOVE:
-      case Move.CAPTURE: {
+      case Move.CAPTURE:
+      case Move.PROMOTE: {
         const { from, to } = displayMove;
 
         if (isDefined(from) && isDefined(to)) {
@@ -162,15 +195,21 @@ export default function Home() {
             from,
             to,
             chessboard,
-            displayMove.type
+            displayMove.type,
+            direction,
+            displayMove.capturedPiece,
+            displayMove.player,
+            displayMove.promoteTo,
+            displayMove.enpassant,
+            displayMove.capturedSquare
           );
+          setHighlightMoves([
+            squareToIdx(from, "White"),
+            squareToIdx(to, "White"),
+          ]);
           setChessboard(updatedBoard);
         }
 
-        break;
-      }
-      case Move.RESULT: {
-        alert("GAME OVER");
         break;
       }
       case Move.CASTLE_LONG: {
@@ -179,30 +218,42 @@ export default function Home() {
             "e1",
             "c1",
             chessboard,
-            displayMove.type
+            displayMove.type,
+            direction
           );
           const updatedBoard = movePiece(
             "a1",
             "d1",
             boardChangeOne,
-            displayMove.type
+            displayMove.type,
+            direction
           );
 
+          setHighlightMoves([
+            squareToIdx("e1", "White"),
+            squareToIdx("c1", "White"),
+          ]);
           setChessboard(updatedBoard);
         } else {
           const boardChangeOne = movePiece(
             "e8",
             "c8",
             chessboard,
-            displayMove.type
+            displayMove.type,
+            direction
           );
           const updatedBoard = movePiece(
             "a8",
             "d8",
             boardChangeOne,
-            displayMove.type
+            displayMove.type,
+            direction
           );
 
+          setHighlightMoves([
+            squareToIdx("e8", "White"),
+            squareToIdx("c8", "White"),
+          ]);
           setChessboard(updatedBoard);
         }
         break;
@@ -213,30 +264,42 @@ export default function Home() {
             "e1",
             "g1",
             chessboard,
-            displayMove.type
+            displayMove.type,
+            direction
           );
           const updatedBoard = movePiece(
             "h1",
             "f1",
             boardChangeOne,
-            displayMove.type
+            displayMove.type,
+            direction
           );
 
+          setHighlightMoves([
+            squareToIdx("e1", "White"),
+            squareToIdx("g1", "White"),
+          ]);
           setChessboard(updatedBoard);
         } else {
           const boardChangeOne = movePiece(
             "e8",
             "g8",
             chessboard,
-            displayMove.type
+            displayMove.type,
+            direction
           );
           const updatedBoard = movePiece(
             "h8",
             "f8",
             boardChangeOne,
-            displayMove.type
+            displayMove.type,
+            direction
           );
 
+          setHighlightMoves([
+            squareToIdx("e8", "White"),
+            squareToIdx("g8", "White"),
+          ]);
           setChessboard(updatedBoard);
         }
         break;
@@ -246,52 +309,59 @@ export default function Home() {
     setCurMove(curMove + dirConst);
   };
 
+  const layoutRef = useRef<HTMLDivElement>(null);
+
+  const listener = () => {
+    setShowModal(false);
+  };
+
+  useEffect(() => {
+    const refClone = layoutRef.current?.cloneNode();
+
+    if (layoutRef.current) {
+      if (showModal) {
+        layoutRef.current.addEventListener("click", listener);
+      } else {
+        layoutRef.current.removeEventListener("click", listener);
+      }
+    }
+
+    return () => refClone?.removeEventListener("click", listener);
+  }, [showModal]);
+
+  const handleUsage = () => {
+    setShowModal(!showModal);
+  };
+
   return (
     <main>
-      <div className={styles["chess-board"]}>
-        {chessboard.map((_, i) => {
-          return <div key={i} className={styles["chess-board--square"]} />;
-        })}
-      </div>
+      {showModal && <UsageModal />}
       <div
-        className={classNames(styles["chess-board"], styles["inner-pieces"])}
+        ref={layoutRef}
+        className={classNames(
+          styles["main-layout"],
+          showModal && styles["dim"]
+        )}
       >
-        {chessboard.map((piece) => {
-          return (
-            <motion.div
-              key={piece.id}
-              className={styles["chess-board--square__inner"]}
-              transition={{
-                layout: { duration: 0.3, ease: "linear" },
-              }}
-              layout
-            >
-              {piece.piece && <Image src={PieceMap[piece.piece]} alt="" />}
-            </motion.div>
-          );
-        })}
+        <Chessboard
+          meta={meta}
+          board={chessboard}
+          highlightMoves={highlightMoves}
+        />
+        <div>
+          <div className={styles["usage-button"]}>
+          <button onClick={handleUsage}>
+            <QuestionMark /> Usage
+          </button>
+          </div>
+          <MoveInfo
+            handleReset={handleReset}
+            handleMove={handleMove}
+            moves={moves}
+            curMove={curMove}
+          />
+        </div>
       </div>
-      <button disabled={curMove <= 0} onClick={() => handleMove("PREV")}>
-        Prev move
-      </button>
-      <button
-        disabled={curMove === moves.length - 1}
-        onClick={() => handleMove("NEXT")}
-      >
-        Next move
-      </button>
-      <textarea value={curPgn} onChange={(e) => setCurPgn(e.target.value)} />
-      <button
-        onClick={() => {
-          setCurMove(-1);
-          setChessboard(setupBoard());
-          const pgnParser = new PGNParser(curPgn);
-          setMoves(pgnParser.moves.flat());
-          console.log(curPgn);
-        }}
-      >
-        Load game
-      </button>
     </main>
   );
 }

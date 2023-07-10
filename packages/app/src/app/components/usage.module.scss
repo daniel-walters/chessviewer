@@ -1,0 +1,38 @@
+@import "src/app/variables";
+
+.usage-modal {
+  z-index: 1000;
+  border: 2px solid black;
+  border-radius: $sm;
+  padding: $sm $md;
+  height: 75vh;
+  width: 40vw;
+  position: absolute;
+  top: 12.5vh;
+  left: 30vw;
+  background-color: #acabab;
+  filter: brightness(1.4);
+
+  h1 {
+    text-align: center;
+    margin-bottom: $xl;
+    font-size: $fontXl;
+  }
+
+  p {
+    margin-bottom: $md;
+    line-height: 2;
+    font-size: $fontMd;
+  }
+
+  @media screen and (max-width: 1080px) {
+    width: 80vw;
+    left: 10vw;
+    h1 {
+      font-size: $fontLg;
+    }
+    p {
+      font-size: $fontMd;
+    }
+  }
+}

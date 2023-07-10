@@ -1,0 +1,25 @@
+@import "src/app/variables";
+
+.move-viewer {
+  background-color: $moveViewerCol;
+  word-spacing: 1ch;
+  padding: 0 $sm;
+  font-size: $fontMd;
+
+  &--move-number {
+    color: $moveNumberCol;
+  }
+
+  &--pgn {
+    color: $pgnCol;
+    font-weight: bold;
+
+    &.highlight {
+      background-color: $pgnHighlight;
+    }
+  }
+
+  @media screen and (max-width: 1080px) {
+    font-size: $fontSm;
+  }
+}

@@ -1,0 +1,125 @@
+@import "src/app/variables";
+
+.move-info {
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-right: $xxl;
+  margin-left: $xxl;
+  display: flex;
+  flex-direction: column;
+  background-color: $moveViewerCol;
+  border-radius: $xs;
+
+  &--title {
+    background-color: #22201e;
+    margin-bottom: $md;
+    height: $xxl;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: $xs;
+    border-top-right-radius: $xs;
+
+    color: white;
+    text-align: center;
+  }
+
+  .error-text {
+    color: red;
+  }
+
+  &--input {
+    margin-top: $lg;
+    display: flex;
+    flex-direction: column;
+    padding: 0 $sm;
+    justify-content: center;
+
+    textarea {
+      resize: none;
+      height: 200px;
+    }
+  }
+  &--cta {
+    background-color: #80b64b;
+    color: white;
+    width: fit-content;
+    padding: $sm $xs;
+    border: none;
+    font-weight: bold;
+    border-radius: $xs;
+    align-self: center;
+    margin-top: $sm;
+    margin-bottom: $xl;
+  }
+
+  &--controls {
+    margin-top: auto;
+    margin-bottom: $md;
+    display: flex;
+    justify-content: center;
+    gap: $sm;
+
+    button {
+      background-color: $bgCol;
+      color: white;
+      border: none;
+      padding: $xs $xl;
+      border-radius: $xs;
+
+      &:hover {
+        cursor: pointer;
+      }
+
+      &:disabled {
+        &:hover {
+          cursor: default;
+        }
+        svg {
+          fill: $moveViewerCol;
+        }
+      }
+    }
+
+    svg {
+      height: $xl;
+      width: $xl;
+      fill: $pgnCol;
+    }
+  }
+
+  @media screen and (max-width: 1080px) {
+    &--title {
+      height: $xl;
+      margin-bottom: $sm;
+      h2 {
+        font-size: $fontMd;
+      }
+    }
+
+    &--cta {
+      order: 3;
+      margin-bottom: $md;
+    }
+
+    &--viewer {
+      order: 1;
+    }
+
+    &--input {
+      order: 2;
+    }
+
+    &--controls {
+      margin-bottom: $sm;
+      order: 0;
+      button {
+        padding: $xs $xl;
+      }
+      svg {
+        height: $md;
+        width: $md;
+      }
+    }
+  }
+}

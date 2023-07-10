@@ -1,0 +1,82 @@
+@import "src/app/variables";
+
+.chess-board {
+  margin-top: $xl;
+  margin-left: $xxl;
+
+  h2 {
+    color: white;
+    text-align: center;
+    margin-bottom: $xl;
+  }
+
+  &--board {
+    position: relative;
+    width: 80vh;
+    height: 80vh;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-template-rows: repeat(8, 1fr);
+
+    &--square {
+      height: 100%;
+      width: 100%;
+
+      $reverse: false;
+
+      @for $i from 0 through 63 {
+        &:nth-child(#{$i + 1}) {
+          @if $i % 8 == 0 and $i != 0 {
+            $reverse: not $reverse;
+          }
+
+          @if $reverse {
+            @if $i % 2 == 0 {
+              background-color: $squareOneCol;
+            } @else {
+              background-color: $squareTwoCol;
+            }
+          } @else {
+            @if $i % 2 == 0 {
+              background-color: $squareTwoCol;
+            } @else {
+              background-color: $squareOneCol;
+            }
+          }
+        }
+      }
+
+      &.highlight {
+        background-color: $squareHighlight;
+      }
+    }
+
+    &.inner-pieces {
+      position: absolute;
+      top: 0;
+      margin: 0;
+
+      .chess-board--square__inner {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        img {
+          height: 85%;
+          width: 85%;
+        }
+      }
+    }
+  }
+
+  @media screen and (max-width: 1080px) {
+    margin-left: $sm;
+    margin-right: $sm;
+    margin-top: $sm;
+    &--board {
+      height: 80vw;
+      width: 80vw;
+      margin: auto;
+    }
+  }
+}
