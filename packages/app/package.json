@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "clean": "rm -rf *.tsbuildinfo dist"
+    "clean": "rm -rf *.tsbuildinfo .next",
+    "build:ci": "lerna run build"
   },
   "dependencies": {
     "@chessviewer/chess": "0.0.1",
