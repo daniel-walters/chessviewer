@@ -15,7 +15,7 @@ export function assertIsFile(maybeFile: string): asserts maybeFile is File {
 }
 
 export function assertIsSquare(
-  maybeSquare: string
+  maybeSquare: string,
 ): asserts maybeSquare is Square {
   const maybeFile = maybeSquare.charAt(0);
   const maybeRank = maybeSquare.charAt(1);

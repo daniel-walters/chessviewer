@@ -82,7 +82,7 @@ const movePiece = (
   colour?: PieceColour,
   promoteTo?: PieceName,
   enpassant?: boolean,
-  capturedSquare?: Square
+  capturedSquare?: Square,
 ): Chessboard => {
   const fromIdx = squareToIdx(from, "White");
   const toIdx = squareToIdx(to, "White");
@@ -201,7 +201,7 @@ export default function Home() {
             displayMove.player,
             displayMove.promoteTo,
             displayMove.enpassant,
-            displayMove.capturedSquare
+            displayMove.capturedSquare,
           );
           setHighlightMoves([
             squareToIdx(from, "White"),
@@ -219,14 +219,14 @@ export default function Home() {
             "c1",
             chessboard,
             displayMove.type,
-            direction
+            direction,
           );
           const updatedBoard = movePiece(
             "a1",
             "d1",
             boardChangeOne,
             displayMove.type,
-            direction
+            direction,
           );
 
           setHighlightMoves([
@@ -240,14 +240,14 @@ export default function Home() {
             "c8",
             chessboard,
             displayMove.type,
-            direction
+            direction,
           );
           const updatedBoard = movePiece(
             "a8",
             "d8",
             boardChangeOne,
             displayMove.type,
-            direction
+            direction,
           );
 
           setHighlightMoves([
@@ -265,14 +265,14 @@ export default function Home() {
             "g1",
             chessboard,
             displayMove.type,
-            direction
+            direction,
           );
           const updatedBoard = movePiece(
             "h1",
             "f1",
             boardChangeOne,
             displayMove.type,
-            direction
+            direction,
           );
 
           setHighlightMoves([
@@ -286,14 +286,14 @@ export default function Home() {
             "g8",
             chessboard,
             displayMove.type,
-            direction
+            direction,
           );
           const updatedBoard = movePiece(
             "h8",
             "f8",
             boardChangeOne,
             displayMove.type,
-            direction
+            direction,
           );
 
           setHighlightMoves([
@@ -340,7 +340,7 @@ export default function Home() {
         ref={layoutRef}
         className={classNames(
           styles["main-layout"],
-          showModal && styles["dim"]
+          showModal && styles["dim"],
         )}
       >
         <Chessboard
@@ -350,9 +350,9 @@ export default function Home() {
         />
         <div>
           <div className={styles["usage-button"]}>
-          <button onClick={handleUsage}>
-            <QuestionMark /> Usage
-          </button>
+            <button onClick={handleUsage}>
+              <QuestionMark /> Usage
+            </button>
           </div>
           <MoveInfo
             handleReset={handleReset}

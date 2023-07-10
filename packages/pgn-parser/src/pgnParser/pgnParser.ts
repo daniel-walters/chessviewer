@@ -45,7 +45,7 @@ export type MoveInformation = {
   capturedPiece?: PieceName;
   rawPGN: string;
   enpassant?: boolean;
-  capturedSquare?: Square
+  capturedSquare?: Square;
 };
 export type TurnInformation = [MoveInformation, MoveInformation]; // [white, black]
 export type ParsedMoves = TurnInformation[];
@@ -77,7 +77,7 @@ export default class PGNParser {
     const turns: TurnInformation[] = [];
 
     const PGNTurns = this.#PGNMovesByTurn(
-      split.length === 1 ? rawMeta : rawMoves
+      split.length === 1 ? rawMeta : rawMoves,
     );
 
     PGNTurns.forEach((turn) => {
@@ -156,7 +156,7 @@ export default class PGNParser {
   #handleCastle(
     player: PieceColour,
     type: CastleType,
-    move: string
+    move: string,
   ): MoveInformation {
     const info: MoveInformation = {
       to: null,
@@ -191,7 +191,7 @@ export default class PGNParser {
   #handleMove(
     move: string,
     player: PieceColour,
-    type: MoveType
+    type: MoveType,
   ): MoveInformation {
     const info: MoveInformation = {
       type: Move.MOVE,
@@ -212,13 +212,18 @@ export default class PGNParser {
           "Pawn",
           player,
           square,
-          originFile
+          originFile,
         );
 
         if (possibleSquares.length === 1) {
           originSquare = possibleSquares[0]!.currentSquare;
         } else {
-          originSquare = filterTakenSquares("Pawn", possibleSquares, square, this.chess).currentSquare;
+          originSquare = filterTakenSquares(
+            "Pawn",
+            possibleSquares,
+            square,
+            this.chess,
+          ).currentSquare;
         }
 
         assertIsDefined(originSquare);
@@ -254,7 +259,7 @@ export default class PGNParser {
             piece,
             player,
             targetSquare,
-            originFile
+            originFile,
           );
 
           if (possibleSquares.length === 1) {
@@ -264,7 +269,7 @@ export default class PGNParser {
               piece,
               possibleSquares,
               targetSquare,
-              this.chess
+              this.chess,
             ).currentSquare;
           }
 
@@ -283,7 +288,7 @@ export default class PGNParser {
           const possibleSquares = this.chess.findPiece(
             piece,
             player,
-            targetSquare
+            targetSquare,
           );
 
           if (possibleSquares.length === 1) {
@@ -293,7 +298,7 @@ export default class PGNParser {
               piece,
               possibleSquares,
               targetSquare,
-              this.chess
+              this.chess,
             ).currentSquare;
           }
 
@@ -305,7 +310,7 @@ export default class PGNParser {
           this.chess.movePiece(originSquare, targetSquare);
         } else {
           throw new Error(
-            "Target square for piece movement could not be determined"
+            "Target square for piece movement could not be determined",
           );
         }
         break;
@@ -332,7 +337,7 @@ export default class PGNParser {
   #handleCapture(
     move: string,
     player: PieceColour,
-    type: CaptureType
+    type: CaptureType,
   ): MoveInformation {
     const info: MoveInformation = {
       type: Move.CAPTURE,
@@ -355,7 +360,7 @@ export default class PGNParser {
           "Pawn",
           player,
           captureSquare,
-          pawnFile
+          pawnFile,
         )[0]?.currentSquare;
 
         assertIsDefined(originSquare);
@@ -404,7 +409,7 @@ export default class PGNParser {
           const possibleSquares = this.chess.findPiece(
             piece,
             player,
-            targetSquare
+            targetSquare,
           );
 
           if (possibleSquares.length === 1) {
@@ -414,7 +419,7 @@ export default class PGNParser {
               piece,
               possibleSquares,
               targetSquare,
-              this.chess
+              this.chess,
             ).currentSquare;
           }
 
@@ -437,7 +442,7 @@ export default class PGNParser {
             piece,
             player,
             targetSquare,
-            originFile
+            originFile,
           );
 
           if (possibleSquares.length === 1) {
@@ -447,7 +452,7 @@ export default class PGNParser {
               piece,
               possibleSquares,
               targetSquare,
-              this.chess
+              this.chess,
             ).currentSquare;
           }
 

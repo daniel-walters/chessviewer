@@ -44,7 +44,7 @@ describe("Utils", () => {
   describe("filterInvalidSquares", () => {
     it("should remove invalid squares from an array", () => {
       expect(
-        filterInvalidSquares(["asd", "d4", "e3", "k5", "a100", "c4"])
+        filterInvalidSquares(["asd", "d4", "e3", "k5", "a100", "c4"]),
       ).toEqual(["d4", "e3", "c4"]);
     });
   });

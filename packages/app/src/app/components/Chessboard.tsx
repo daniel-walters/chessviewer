@@ -62,7 +62,7 @@ function Chessboard({ meta, board, highlightMoves }: ChessboardProps) {
               key={i}
               className={classNames(
                 styles["chess-board--board--square"],
-                highlightMoves.includes(i) && styles["highlight"]
+                highlightMoves.includes(i) && styles["highlight"],
               )}
             />
           );
@@ -70,7 +70,7 @@ function Chessboard({ meta, board, highlightMoves }: ChessboardProps) {
         <div
           className={classNames(
             styles["chess-board--board"],
-            styles["inner-pieces"]
+            styles["inner-pieces"],
           )}
         >
           {board.map((piece) => {

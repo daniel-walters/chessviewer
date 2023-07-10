@@ -21,7 +21,7 @@ export function filterTakenSquares(
   pieceKind: PieceName,
   possibleSquares: Chessboard,
   targetSquare: Square,
-  board: Chess
+  board: Chess,
 ): ChessPiece {
   const [tFile, tRank] = splitSquare(targetSquare);
 

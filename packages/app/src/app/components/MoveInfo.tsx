@@ -56,7 +56,7 @@ function MoveInfo({ handleReset, handleMove, moves, curMove }: MoveInfoProps) {
             setEdit(false);
           } catch (e) {
             setError(
-              "Something went wrong reading the PGN. Please check the format and try again."
+              "Something went wrong reading the PGN. Please check the format and try again.",
             );
           }
         }}

@@ -8,10 +8,10 @@ describe("getPossibleMoves", () => {
       const otherPawn = new ChessPiece("Black", "Pawn", "d5");
 
       expect(getPossibleMoves(startingPawn).sort()).toEqual(
-        ["d6", "d5", "c6", "e6"].sort()
+        ["d6", "d5", "c6", "e6"].sort(),
       );
       expect(getPossibleMoves(otherPawn).sort()).toEqual(
-        ["d4", "c4", "e4"].sort()
+        ["d4", "c4", "e4"].sort(),
       );
     });
 
@@ -20,10 +20,10 @@ describe("getPossibleMoves", () => {
       const otherPawn = new ChessPiece("White", "Pawn", "d5");
 
       expect(getPossibleMoves(startingPawn).sort()).toEqual(
-        ["d3", "d4", "c3", "e3"].sort()
+        ["d3", "d4", "c3", "e3"].sort(),
       );
       expect(getPossibleMoves(otherPawn).sort()).toEqual(
-        ["d6", "e6", "c6"].sort()
+        ["d6", "e6", "c6"].sort(),
       );
     });
   });
@@ -33,7 +33,7 @@ describe("getPossibleMoves", () => {
       const knight = new ChessPiece("Black", "Knight", "d5");
 
       expect(getPossibleMoves(knight).sort()).toEqual(
-        ["c7", "e7", "f6", "f4", "e3", "c3", "b4", "b6"].sort()
+        ["c7", "e7", "f6", "f4", "e3", "c3", "b4", "b6"].sort(),
       );
     });
 
@@ -41,7 +41,7 @@ describe("getPossibleMoves", () => {
       const knightOnEdge = new ChessPiece("Black", "Knight", "d8");
 
       expect(getPossibleMoves(knightOnEdge).sort()).toEqual(
-        ["b7", "c6", "f7", "e6"].sort()
+        ["b7", "c6", "f7", "e6"].sort(),
       );
     });
   });
@@ -63,7 +63,7 @@ describe("getPossibleMoves", () => {
           "b4",
           "d2",
           "e1",
-        ].sort()
+        ].sort(),
       );
     });
 
@@ -83,7 +83,7 @@ describe("getPossibleMoves", () => {
           "c4",
           "b5",
           "a6",
-        ].sort()
+        ].sort(),
       );
     });
   });
@@ -108,7 +108,7 @@ describe("getPossibleMoves", () => {
           "f2",
           "g2",
           "h2",
-        ].sort()
+        ].sort(),
       );
     });
   });
@@ -144,7 +144,7 @@ describe("getPossibleMoves", () => {
           "c4",
           "b5",
           "a6",
-        ].sort()
+        ].sort(),
       );
     });
   });
@@ -154,7 +154,7 @@ describe("getPossibleMoves", () => {
       const king = new ChessPiece("White", "King", "c5");
 
       expect(getPossibleMoves(king).sort()).toEqual(
-        ["c6", "d6", "d5", "d4", "c4", "b4", "b5", "b6"].sort()
+        ["c6", "d6", "d5", "d4", "c4", "b4", "b5", "b6"].sort(),
       );
     });
 
@@ -162,7 +162,7 @@ describe("getPossibleMoves", () => {
       const kingOnEdge = new ChessPiece("White", "King", "h5");
 
       expect(getPossibleMoves(kingOnEdge).sort()).toEqual(
-        ["h6", "h4", "g4", "g5", "g6"].sort()
+        ["h6", "h4", "g4", "g5", "g6"].sort(),
       );
     });
   });

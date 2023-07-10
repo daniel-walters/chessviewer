@@ -20,7 +20,7 @@ export default class Chess {
     type: PieceName,
     colour: PieceColour,
     destination: Square,
-    startingFile?: File
+    startingFile?: File,
   ): (ChessPiece | null)[] {
     return (
       this.board.filter((square) => {

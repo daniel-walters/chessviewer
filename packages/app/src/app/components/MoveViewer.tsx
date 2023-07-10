@@ -26,7 +26,7 @@ function MoveViewer({ className, moves, curMove }: MoveViewerProps) {
             <span
               className={classNames(
                 styles["move-viewer--pgn"],
-                i === curMove && styles["highlight"]
+                i === curMove && styles["highlight"],
               )}
             >
               {move.rawPGN}

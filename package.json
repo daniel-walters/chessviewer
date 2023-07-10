@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc --build --verbose",
     "clean": "lerna run clean",
-    "prettier": "prettier --write"
+    "prettier": "prettier . --write"
   },
   "author": "Daniel Walters",
   "license": "ISC",
